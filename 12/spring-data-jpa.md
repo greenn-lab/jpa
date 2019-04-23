@@ -67,6 +67,7 @@ interface MemberRepository extends Repository<Member, Long> {
 
 아래의 표는 쿼리를 생성하는 키워드에 대한 최신 명세에요.
 https://docs.spring.io/spring-data/jpa/docs/2.2.x/reference/html/#jpa.query-methods.query-creation
+
 |Keyword|Sample|JPQL snippet|
 |--- |--- |--- |
 |And|findByLastnameAndFirstname|… where x.lastname = ?1 and x.firstname = ?2|
