@@ -413,7 +413,8 @@ public Object list(
     size = 12,
     sort = "name",
     direction = Sort.Direction.DESC
-  ) Pageable memberPage,
+  )
+  Pageable memberPage
 ) { ... }
 ```
 
@@ -426,6 +427,215 @@ public Object list(
     @SortDefault(sort = "name", direction = Sort.Direction.DESC),
     @SortDefault(sort = "age", direction = Sort.Direction.ASC)
   })
-  Pageable memberPage,
+  Pageable memberPage
 ) { ... }
 ```
+
+<br>
+
+## 8. 스프링 데이터 JPA가 사용하는 구현체
+
+spring-data-jpa가 제공하는 공용 인터페이스를 살펴봅니다.
+`org.springframework.data.jpa.repository.support.SimpleJpaRepository` 클래스 인데요.
+
+```java
+@Repository
+@Transactional(readOnly = true)
+public class SimpleJpaRepository<T, ID> implements JpaRepositoryImplementation<T, ID> {
+  ...
+	@Transactional
+	public <S extends T> S save(S entity) {
+
+		if (entityInformation.isNew(entity)) {
+			em.persist(entity);
+			return entity;
+		} else {
+			return em.merge(entity);
+		}
+	}
+  ...
+```
+
+- **`@Repository` 적용**  
+  JPA예외를 스프링이 추상화한 예외로 변환한답니다. 무결성 제약 예외의 경우, `javax.persistence.PersistenceException` 를 `org.springframework.dao.DataIntegrityViolationException` 로 바꿔주는 걸 얘기하는 것 같아요.
+- **`@Transactional(readOnly = true)` 적용**  
+  서비스 계층에서 발생된 트랜젝션을 전파 받아서 쓰게 해주고, 없으면 리포지토리에서 트랜젝션을 만들어 쓰게 해주겠네요.  
+  `readOnly = true` 속성을 이용하면 데이터를 변경하지 않을 때, 약간의 성능 향상을 얻는 답니다.
+- **`save() 메소드`**  
+  인자로 받은 엔티티가 새로운 것이면 `persist()`를, 이미 있는 거라면 `merge()` 를 실행해주네요. 새로운 것이라는 여부는 식별자가 **객체일 때는 null**, **자바 기본 타입일 때는 숫자 0** 인 것으로 확인하는데요,
+
+  ```java
+  interface Persistable<ID extends Serializable> extends Serializable {
+    ID getId();
+    boolean isNew();
+  }
+  ```
+
+  를 구현해서 판단 로직을 바꿀 수도 있대요.
+
+  <br>
+
+## 9 JPA 샵에 적용
+
+### 9.1 환경 설정
+
+spring-boot을 이용한다고 가정하는게 더 실무에 현실적인 것 같아 책의 예제와는 다르게 구성할게요.
+
+### 9.2 리포지토리 리팩토링
+
+회원 리포지토리가,
+
+```java
+@Repository
+class MemberRepository {
+  @PersistenceContext
+  EntityManager em;
+
+  public void save(Member member) {
+    em.persist(member);
+  }
+
+  public Member findOne(Long id) {
+    return em.find(Member.class, id);
+  }
+
+  public List<Member> findAll() {
+    return em.createQuery("SELECT m FROM Member m", Member.class)
+              .getResultList();
+  }
+
+  public List<Member> findByName(String name) {
+    return em.createQuery("SELECT m FROM Member m WHERE m.name=:name", Member.class)
+              .setParameter("name", name)
+              .getResultList();
+  }
+}
+```
+
+이랬던 걸,
+
+```java
+interface MemberRepository extends JpaRepository<Member, Long> {
+  List<Member> findByName(String name);
+}
+```
+
+이렇게 변경 가능하군요. `save(...)`, `findOne(...)`, `findAll()` 이런 메소드들은 `JpaRepository` 가 처리해주니까요.
+
+나머지 `ItemRepository` 랑 `OrderRepository` 는 정리에서 다루진 않을게요. 할게 없으니까요.
+
+### 9.3 명세 적용
+
+이름을 like 검색하게 추가 로직을 만들어 보려면,
+
+```java
+import javax.persistence.criteria.*;
+
+public class OrderSpec {
+  public static Specification<Order> nameLike(final String name) {
+    return new Specification<Order>() {
+      public Predicate toPredicate(Root<Order> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+        if (StringUtils.isEmpty(name)) return null;
+
+        Join<Order, Member> m = root.join("member", JoinType.INNER);
+        return builder.like(m.<String>get("name"), "%" + name + "%");
+      }
+    }
+  }
+}
+```
+
+이렇게 `Specification` 을 선언하고 서비스 계층에서,
+
+```java
+// OrderService.java
+import static org.springframework.data.jpa.domain.Specification.where;
+...
+
+List<Order> findOrdersLikeName(String name) {
+  return orderRepository.findAll(
+    where(OrderSpec.nameLike(name))
+  );
+}
+```
+
+이렇게 써주면 되는군요.
+
+<br>
+
+## 10. spring-data-jpa와 QueryDSL 통합
+
+### 10.1 QuerydslPerdicateExecutor 사용
+
+```java
+public interface ItemRepository extends JpaRepository<Item, Long>,
+    QuerydslPredicateExecutor<Item> {
+}
+```
+
+이렇게 리포지토리에 상속하면 된대요.
+간단히 명세를 보면,
+
+```java
+public interface QuerydslPredicateExecutor<T> {
+  Optional<T> findOne(Predicate pred);
+  Iterable<T> findAll(Predicate pred);
+  Iterable<T> findAll(Predicate pred, Sort sort);
+  Iterable<T> findAll(Predicate pred, Pageable page);
+  long count(Predicate pred);
+  boolean exists(Predicate pred);
+  ...
+}
+```
+
+이렇기 때문에 다음 처럼 코딩할 수 있습니다.
+
+```java
+QItem item = QItem.item;
+Iterable<Item> result = itemRepository.findAll(
+  item.name.contains("TOY")
+    .and(item.price.between(10000, 20000))
+);
+```
+
+물론, `Sort` 와 `Pageable` 을 이용 해서 정렬과 페이지 처리도 할 수 있고요.
+
+### 10.2 QuerydslRepositorySupport 사용
+
+QueryDSL을 100% 활용하려면 `JPQLQuery` 객체를 생성해서 쓰면 되는데, 이때 `QuerydslRepositorySupport` 를 상속하면 더 편리하대요.
+
+일단, 인터페이스를 만들고
+
+```java
+public interface CustomOrderRepository {
+  List<Order> search(OrderSearch search);
+}
+```
+
+공통 인터페이스를 직접 구현이 안되니까 사용자 정의 리포지토리를 선언하고 그걸 구현합니다.
+
+```java
+class OrderRepositoryImpl extends QuerydslRepositorySupport implements CustomOrderRepository {
+  // 상속받은 필수 생성자를 호출해줍니다.
+  public OrderRepositoryImpl() {
+    super(Order.class);
+  }
+
+  @Override
+  public List<Order> search(OrderSearch search) {
+    QOrder order = QOrder.order;
+    QMember member = QMember.member;
+
+    JPQLQuery query = from(order);
+
+    if (StringUtils.hasText(search.getName()))
+      query.leftJoin(order.member, member)
+        .where(member.name.contains(search.getName()));
+
+    if (search.getOrderStatus != null)
+      query.where(order.status.eq(search.getOrderStatus()));
+  }
+}
+```
+
+역시, 마지막 예제라서 제일 깔끔한 것 같네요. 끝!
