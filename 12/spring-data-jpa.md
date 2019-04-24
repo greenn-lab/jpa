@@ -68,32 +68,32 @@ interface MemberRepository extends Repository<Member, Long> {
 아래의 표는 쿼리를 생성하는 키워드에 대한 최신 명세에요.
 https://docs.spring.io/spring-data/jpa/docs/2.2.x/reference/html/#jpa.query-methods.query-creation
 
-|Keyword|Sample|JPQL snippet|
-|--- |--- |--- |
-|And|findByLastnameAndFirstname|… where x.lastname = ?1 and x.firstname = ?2|
-|Or|findByLastnameOrFirstname|… where x.lastname = ?1 or x.firstname = ?2|
-|Is,Equals|findByFirstname,findByFirstnameIs,findByFirstnameEquals|… where x.firstname = ?1|
-|Between|findByStartDateBetween|… where x.startDate between ?1 and ?2|
-|LessThan|findByAgeLessThan|… where x.age < ?1|
-|LessThanEqual|findByAgeLessThanEqual|… where x.age <= ?1|
-|GreaterThan|findByAgeGreaterThan|… where x.age > ?1|
-|GreaterThanEqual|findByAgeGreaterThanEqual|… where x.age >= ?1|
-|After|findByStartDateAfter|… where x.startDate > ?1|
-|Before|findByStartDateBefore|… where x.startDate < ?1|
-|IsNull|findByAgeIsNull|… where x.age is null|
-|IsNotNull,NotNull|findByAge(Is)NotNull|… where x.age not null|
-|Like|findByFirstnameLike|… where x.firstname like ?1|
-|NotLike|findByFirstnameNotLike|… where x.firstname not like ?1|
-|StartingWith|findByFirstnameStartingWith|… where x.firstname like ?1 (parameter bound with appended %)|
-|EndingWith|findByFirstnameEndingWith|… where x.firstname like ?1 (parameter bound with prepended %)|
-|Containing|findByFirstnameContaining|… where x.firstname like ?1 (parameter bound wrapped in %)|
-|OrderBy|findByAgeOrderByLastnameDesc|… where x.age = ?1 order by x.lastname desc|
-|Not|findByLastnameNot|… where x.lastname <> ?1|
-|In|findByAgeIn(Collection<Age> ages)|… where x.age in ?1|
-|NotIn|findByAgeNotIn(Collection<Age> ages)|… where x.age not in ?1|
-|True|findByActiveTrue()|… where x.active = true|
-|False|findByActiveFalse()|… where x.active = false|
-|IgnoreCase|findByFirstnameIgnoreCase|… where UPPER(x.firstame) = UPPER(?1)|
+| Keyword           | Sample                                                  | JPQL snippet                                                   |
+| ----------------- | ------------------------------------------------------- | -------------------------------------------------------------- |
+| And               | findByLastnameAndFirstname                              | … where x.lastname = ?1 and x.firstname = ?2                   |
+| Or                | findByLastnameOrFirstname                               | … where x.lastname = ?1 or x.firstname = ?2                    |
+| Is,Equals         | findByFirstname,findByFirstnameIs,findByFirstnameEquals | … where x.firstname = ?1                                       |
+| Between           | findByStartDateBetween                                  | … where x.startDate between ?1 and ?2                          |
+| LessThan          | findByAgeLessThan                                       | … where x.age < ?1                                             |
+| LessThanEqual     | findByAgeLessThanEqual                                  | … where x.age <= ?1                                            |
+| GreaterThan       | findByAgeGreaterThan                                    | … where x.age > ?1                                             |
+| GreaterThanEqual  | findByAgeGreaterThanEqual                               | … where x.age >= ?1                                            |
+| After             | findByStartDateAfter                                    | … where x.startDate > ?1                                       |
+| Before            | findByStartDateBefore                                   | … where x.startDate < ?1                                       |
+| IsNull            | findByAgeIsNull                                         | … where x.age is null                                          |
+| IsNotNull,NotNull | findByAge(Is)NotNull                                    | … where x.age not null                                         |
+| Like              | findByFirstnameLike                                     | … where x.firstname like ?1                                    |
+| NotLike           | findByFirstnameNotLike                                  | … where x.firstname not like ?1                                |
+| StartingWith      | findByFirstnameStartingWith                             | … where x.firstname like ?1 (parameter bound with appended %)  |
+| EndingWith        | findByFirstnameEndingWith                               | … where x.firstname like ?1 (parameter bound with prepended %) |
+| Containing        | findByFirstnameContaining                               | … where x.firstname like ?1 (parameter bound wrapped in %)     |
+| OrderBy           | findByAgeOrderByLastnameDesc                            | … where x.age = ?1 order by x.lastname desc                    |
+| Not               | findByLastnameNot                                       | … where x.lastname <> ?1                                       |
+| In                | findByAgeIn(Collection<Age> ages)                       | … where x.age in ?1                                            |
+| NotIn             | findByAgeNotIn(Collection<Age> ages)                    | … where x.age not in ?1                                        |
+| True              | findByActiveTrue()                                      | … where x.active = true                                        |
+| False             | findByActiveFalse()                                     | … where x.active = false                                       |
+| IgnoreCase        | findByFirstnameIgnoreCase                               | … where UPPER(x.firstame) = UPPER(?1)                          |
 
 ### 4.2 JPA NamedQuery
 
@@ -144,7 +144,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 ```
 
 이렇게 쓸 수 있는 거래요. `@Query` 속성중에 `nativeQuery = true` 로 네이티브 쿼리 작성할 수도 있대요.  
-근데 **네이티브 쿼리는 <font color="red">위치 기반 파라미터가 0 부터</font> 시작**한대요.
+근데 **네이티브 쿼리는 위치 기반 파라미터가 **0** 부터 시작**한대요.
 
 ### 4.4 파라미터 바인딩
 
@@ -378,12 +378,12 @@ class MemberController {
 이렇게 구현하고,
 
 /member/list?  
-<font color="red">page=0</font>&  
-<font color="red">size=20</font>&  
-<font color="red">sort=name,desc</font>&  
-<font color="red">sort=address.city</font>
+**page=0**&  
+**size=20**&  
+**sort=name,desc**&  
+**sort=address.city**
 
-이렇게 하면 알아서 페이지랑 정렬 처리가 된대요.👏👏👏
+이렇게 URL 요청하면 알아서 페이지랑 정렬 처리가 된대요.👏👏👏
 
 > 페이지가 0 부터 시작하는데 `PageableHandlerMethodArgumentResolver`를 스프링 빈으로 등록하고 `setOneIndexedParameters(true)` 로 설정하면 1 부터 된대요.
 >
@@ -401,10 +401,10 @@ public Object list(
 이렇게 하면,
 
 /member/list?  
-<font color="red">member_page=0</font>&  
-<font color="red">order_page=2</font>&...
+**member_page=0**&  
+**order_page=2**&...
 
-이렇게 쓰면 되고요.
+이렇게 호출하면 되고요.
 
 `Pageable`의 기본값은 **page=0**, **size=20** 인데 이걸 변경하려면,
 
