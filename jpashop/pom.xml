@@ -9,7 +9,7 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>jpabook</groupId>
-  <artifactId>chapter11</artifactId>
+  <artifactId>jpashop</artifactId>
   <version>0.0.1</version>
   <name>chapter11</name>
   <description>jpashop</description>
