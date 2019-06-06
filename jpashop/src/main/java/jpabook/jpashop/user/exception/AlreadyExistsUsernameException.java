@@ -1,4 +1,4 @@
-package jpabook.jpashop.user.web.exception;
+package jpabook.jpashop.user.exception;
 
 import lombok.NoArgsConstructor;
 

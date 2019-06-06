@@ -20,16 +20,11 @@ public class MemberRepositoryTest {
 
   @Before
   public void onload() {
-    Address home = new Address();
-    home.setCity("Incheon");
-    home.setStreet("Gulporo");
-    home.setZipcode("21328");
-
     Member member = new Member();
     member.setId(1L);
     member.setUsername("tester");
     member.setName("tester");
-    member.setAddress(home);
+    member.setAddress(Address.builder().city("Incheon").street("Gulporo").zipcode("21328").build());
 
     repo.save(member);
   }
