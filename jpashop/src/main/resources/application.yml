@@ -11,6 +11,10 @@ spring:
       username: sa
       password: ""
 
+  data:
+    rest:
+      base-path: "/api"
+
 logging.level:
   org.hibernate.SQL: DEBUG
   org.hibernate.type.descriptor.sql.BasicBinder:

@@ -1,16 +1,22 @@
 package jpabook.jpashop.order.domain;
 
+import java.util.Optional;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Column;
+import javax.persistence.Converter;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import jpabook.jpashop.entity.auditor.AuditorEntity;
 import jpabook.jpashop.user.domain.Address;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
-import java.util.Optional;
-
 @Entity
 @Setter
 @Getter
-public class Delivery {
+public class Delivery extends AuditorEntity {
 
   @Id
   @GeneratedValue
@@ -36,7 +42,9 @@ public class Delivery {
   }
 
   @Converter(autoApply = true)
-  public static class DeliveryStatusConverter implements AttributeConverter<DeliveryStatus, String> {
+  public static class DeliveryStatusConverter implements
+      AttributeConverter<DeliveryStatus, String> {
+
     @Override
     public String convertToDatabaseColumn(DeliveryStatus attribute) {
       return Optional.ofNullable(attribute).orElse(DeliveryStatus.READY).code;

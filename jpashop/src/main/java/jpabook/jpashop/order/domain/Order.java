@@ -1,20 +1,30 @@
 package jpabook.jpashop.order.domain;
 
-import jpabook.jpashop.user.domain.Member;
-import lombok.Getter;
-import lombok.Setter;
-
-import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.persistence.AttributeConverter;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Converter;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import jpabook.jpashop.entity.auditor.AuditorEntity;
+import jpabook.jpashop.user.domain.Member;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "ORDERS")
 @Setter
 @Getter
-public class Order {
+public class Order extends AuditorEntity {
 
   @Id
   @GeneratedValue
@@ -60,6 +70,7 @@ public class Order {
 
   @Converter(autoApply = true)
   public static class OrderStatusConverter implements AttributeConverter<OrderStatus, String> {
+
     @Override
     public String convertToDatabaseColumn(OrderStatus attribute) {
       return Optional.ofNullable(attribute).orElse(OrderStatus.ORDERED).getCode();

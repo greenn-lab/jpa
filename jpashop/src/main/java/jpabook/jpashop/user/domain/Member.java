@@ -8,13 +8,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.Size;
+import jpabook.jpashop.entity.auditor.AuditorEntity;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Setter
 @Getter
-public class Member {
+public class Member extends AuditorEntity {
 
   @Id
   @GeneratedValue

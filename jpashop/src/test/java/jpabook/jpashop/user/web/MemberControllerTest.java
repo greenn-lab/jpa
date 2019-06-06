@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jpabook.jpashop.user.domain.Address;
 import jpabook.jpashop.user.domain.Member;
 import jpabook.jpashop.user.service.MemberService;
@@ -25,9 +24,6 @@ import org.springframework.test.web.servlet.ResultActions;
 //@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @WebMvcTest(MemberController.class)
 public class MemberControllerTest {
-
-  @Autowired
-  private ObjectMapper mapper;
 
   @Autowired
   private MockMvc mvc;
